@@ -17,7 +17,6 @@ public class Day01 : BaseDay
     public Day01()
     {
         _input = File.ReadAllText(InputFilePath);
-        // _input = "3   4\n4   3\n2   5\n1   3\n3   9\n3   3";
     }
 
     public override ValueTask<string> Solve_1() => new($"{SumAllDistances()}");
@@ -71,7 +70,6 @@ public class Day01 : BaseDay
         if (_processed is not null) return _processed.Value;
 
         var initial = (new List<int>(), new List<int>());
-        Console.WriteLine(_input.Split("\n"));
         var lists = (new List<int>(), new List<int>());
 
         lists = _input
@@ -91,8 +89,6 @@ public class Day01 : BaseDay
         lists.Item2.Sort();
 
         _processed = lists;
-
-        return lists;
 
         return lists;
 
