@@ -1,17 +1,19 @@
 ﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Spectre.Console;
 
 namespace AdventOfCode;
-
+/// <summary>
+/// --- Day 2: Red-Nosed Reports ---
+/// </summary>
 public class Day02 : BaseDay
 {
-    private readonly string _input;
-    private List<List<int>> _processed = null;
+    private readonly IEnumerable<string> _input;
 
     public Day02()
     {
-        _input = File.ReadAllText(InputFilePath);
+        _input = File.ReadLines(InputFilePath);
     }
 
     public override ValueTask<string> Solve_1() => new($"{NumberOfSafeZones()}");
@@ -19,78 +21,33 @@ public class Day02 : BaseDay
     public override ValueTask<string> Solve_2() => new($"{NumberOfSafeZones(true)}");
 
 
-    
-    private bool IsZoneSafe(List<int> zoneValues)
+/// <summary>
+/// Process an array of numbers (A report to determine if it follows the rules)
+/// </summary>
+/// <param name="report"></param>
+/// <param name="problemDampener">If set, then ignore one potential problematic value in a report</param>
+/// <returns>True if safe</returns>
+    private bool IsZoneSafe(int[] report, bool problemDampener = false)
     {
-        bool increasing = false;
-        if (zoneValues[1] > zoneValues[0]) { increasing = true; }
-        for (int i = 1; i < zoneValues.Count(); i++)
+        var initDirection = int.Sign(report[1] - report[0]);
+
+        for (var i = 0; i < report.Length - 1; i++)
         {
-            var testNumber = zoneValues[i] - zoneValues[i - 1];
-            if ( Math.Abs(testNumber) > 3 | (increasing & testNumber <= 0) | (!increasing & testNumber >= 0))
-            {
-                return false;
-            }
+            var testValue = report[i + 1] - report[i];
+            var dir = int.Sign(testValue);
 
+            if (dir != 0 && dir == initDirection && 1 <= Math.Abs(testValue) && Math.Abs(testValue) <= 3)
+                continue;
+
+            return problemDampener && 
+            (IsZoneSafe(report.Where((_, idx) => idx != i).ToArray()) || IsZoneSafe(report.Where((_, idx) => idx != i + 1).ToArray()));
         }
-
         return true;
     }
 
+    private int NumberOfSafeZones(bool problemDampener = false) => 
+        _input.Select(report => IsZoneSafe(Process(report), problemDampener))
+        .Count(isSafe => isSafe);
 
-    private bool IsZoneSafeDamper(List<int> zoneValues)
-    {
-        bool increasing = false;
-        if (zoneValues[1] > zoneValues[0]) { increasing = true; }
-        
-        for (int i = 1; i < zoneValues.Count(); i++)
-        {
-            var testNumber = zoneValues[i] - zoneValues[i - 1];
-            if ( Math.Abs(testNumber) > 3 | (increasing & testNumber <= 0) | (!increasing & testNumber >= 0))
-            {
-                List<int> blindValuesI = [.. zoneValues];
-                List<int> blindValues = [.. zoneValues];
-                blindValues.RemoveAt(i-1);
-                blindValuesI.RemoveAt(i);
-                if (IsZoneSafe(blindValuesI) | IsZoneSafe(blindValues))
-                { return true;}
-                else return false;
-            }
-
-        }
-
-        return true;
-    }
-
-
-    private int NumberOfSafeZones(bool ProblemDampener = false) =>
-    {
-        _input.Select(AllowReversePInvokeCallsAttribute => IsZoneSafe(Process(report), ProblemDampener)
-
-        return zones.Aggregate(0, (agg, next) =>
-        {
-            if (IsZoneSafe(next))
-            {
-                agg++;
-                return agg;
-            }
-            return agg;
-
-        });
-    }
-
-    private int ProblemDamperSafeZones()
-    {
-        var zones = ProcessInput();
-
-        return zones.Aggregate(0, (agg, next) =>
-        {
-            if (IsZoneSafeDamper(next))
-            {
-                agg++;
-                return agg;
-            }
-            return agg;
-        });
-    }
+    private static int[] Process(string report) => report.Split(' ').Select(int.Parse).ToArray();
 }
