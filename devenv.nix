@@ -1,19 +1,25 @@
-{ pkgs, lib, config, inputs, ... }:
+{
+  pkgs,
+  lib,
+  config,
+  inputs,
+  ...
+}:
 
 {
   # https://devenv.sh/basics/
   env.GREET = "devenv";
 
   # https://devenv.sh/packages/
-  packages = [ 
+  packages = [
     pkgs.git
     pkgs.omnisharp-roslyn
-    
+    pkgs.csharpier
   ];
 
   # https://devenv.sh/languages/
   languages.dotnet.enable = true;
-  languages.dotnet.package = pkgs.dotnetCorePackages.sdk_9_0;
+  languages.dotnet.package = pkgs.dotnetCorePackages.dotnet_9.sdk;
 
   # https://devenv.sh/processes/
   # processes.cargo-watch.exec = "cargo-watch";
